@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:poshpicks/fuctions/authfunctions.dart';
 import 'package:poshpicks/screens/signup_screen.dart';
 
 class Signinscreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class _SigninscreenState extends State<Signinscreen> {
                   TextField(
                     controller: _usernameController,
                     decoration: const InputDecoration(
-                      labelText: "Username",
+                      labelText: "Email",
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -59,6 +60,7 @@ class _SigninscreenState extends State<Signinscreen> {
                     child: ElevatedButton(
                       child: Text('Submit',style: TextStyle(fontSize: 18.0)),
                       onPressed: () {
+                        signin(_usernameController.text, _passwordController.text);
                         // Handle login logic here
                         print('Logging in...');
                         // TODO: Implement login logic
