@@ -10,22 +10,43 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _agreeToTerms = false;
   String _selectedCountry = "India"; // Default country
-  double _age = 18.0; // Initial age for slider
+  double _age = 18; // Initial age for slider
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 247, 191, 80),
+      resizeToAvoidBottomInset: false,
+
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: "Name",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20.0),
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: "Email",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20.0),
               // Username Text Field
               TextField(
                 controller: _usernameController,
@@ -106,9 +127,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 onPressed: () {
                   // Add logic to handle form submission (e.g., validate input, register user)
                   print(
+                    "Name: ${_nameController.text}\n"
+                        "Email: ${_emailController.text}\n"
                     "Username: ${_usernameController.text}\n"
-                    "Password: ${_passwordController.text}\n"
-                    "Agreed to Terms: $_agreeToTerms\n"
+                        "Password: ${_passwordController.text}\n"
+                        "Agreed to Terms: $_agreeToTerms\n"
                     "Country: $_selectedCountry\n"
                     "Age: $_age",
                   );

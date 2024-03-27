@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "30745917348",
+    "firebase_url": "https://poshpicks-389d4-default-rtdb.firebaseio.com",
+    "project_id": "poshpicks-389d4",
+    "storage_bucket": "poshpicks-389d4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30745917348:android:ffa6525c32549e614ef331",
+        "android_client_info": {
+          "package_name": "com.example.poshpicks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI9nCjmetdSZ07sQFTKBq0Nldgj5iUSk8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
