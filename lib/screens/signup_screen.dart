@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:poshpicks/fuctions/authfunctions.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -66,7 +67,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: InputDecoration(
                   labelText: "Username",
                   border: OutlineInputBorder(),
-                  errorText: _usernameValid ? null : "Enter a valid username",
+                  errorText:
+                  _usernameValid ? null : "Enter a valid username",
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -81,7 +83,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: InputDecoration(
                   labelText: "Password",
                   border: OutlineInputBorder(),
-                  errorText: _passwordValid ? null : "Enter a valid password",
+                  errorText:
+                  _passwordValid ? null : "Enter a valid password",
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -151,26 +154,59 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  void _validateAndSignUp() {
+  void _validateAndSignUp() async {
     if (_nameValid &&
         _emailValid &&
         _usernameValid &&
         _passwordValid &&
         _agreeToTerms) {
+      CollectionReference collRef =
+      FirebaseFirestore.instance.collection('User');
+      DocumentReference docRef = await collRef.add({
+        'Name': _nameController.text,
+        'Email': _emailController.text,
+        'Username': _usernameController.text,
+        'Password': _passwordController.text,
+        'Agreed to Terms': _agreeToTerms,
+        'Country': _selectedCountry,
+        'Age': _age,
+      });
+
+      // Fetch user details
+      DocumentSnapshot snapshot = await docRef.get();
+      // Show user details in a popup
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("User Details"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Name: ${snapshot['Name']}"),
+              Text("Email: ${snapshot['Email']}"),
+              Text("Username: ${snapshot['Username']}"),
+              Text("Country: ${snapshot['Country']}"),
+              Text("Age: ${snapshot['Age']}"),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Signinscreen()),
+                );
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+
+      // Perform sign up
       signup(_emailController.text, _passwordController.text);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Signinscreen()),
-      );
-      print(
-        "Name: ${_nameController.text}\n"
-            "Email: ${_emailController.text}\n"
-            "Username: ${_usernameController.text}\n"
-            "Password: ${_passwordController.text}\n"
-            "Agreed to Terms: $_agreeToTerms\n"
-            "Country: $_selectedCountry\n"
-            "Age: $_age",
-      );
     } else {
       // Show error message or handle invalid input
       showDialog(
