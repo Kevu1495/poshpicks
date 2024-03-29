@@ -1,4 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import '../features/home/view/home_view.dart';
 
 signup(String email,String pass) async{
   try {
@@ -18,13 +22,17 @@ signup(String email,String pass) async{
   }
 }
 
-signin(String email,String pass) async{
+signin(String email,String pass,BuildContext context) async{
   try {
     UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: pass
     );
     print("signin");
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HomeView()),
+    );
 
   } on FirebaseAuthException catch (e) {
     if (e.code == 'user-not-found') {
