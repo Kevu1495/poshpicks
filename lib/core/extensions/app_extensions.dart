@@ -143,9 +143,9 @@ extension ThemeExtension on BuildContext {
 
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 
-  Color get primaryColor => const Color(0xFF5c3fbc);
-  Color get secondaryColor => const Color(0xFFdadbfe);
-  Color get secondaryVariant => const Color(0xFFffd301);
+  Color get primaryColor => const Color(0xFFF7BF50);
+  Color get secondaryColor => const Color(0xFF261601);
+  Color get secondaryVariant => const Color(0xFF261601);
 
   // I use Apple Human Interface Guidelines
   // For detailed information: https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/

@@ -1,5 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:poshpicks/screens/SignInScreen.dart';
 import '../../../product/component/text/subtitle1_text.dart';
 import '../../../core/base/view/base_view.dart';
 import '../../../product/component/card/special_icon_card.dart';
@@ -37,15 +38,26 @@ class HomeView extends StatelessWidget {
       );
 
   AppBar _appBar(BuildContext context, HomeViewModel viewModel) => AppBar(
-        backgroundColor: context.primaryColor,
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        title: _appBarTitle(context),
-        actions: [_totalMoney(context, viewModel)],
-      );
+    backgroundColor: context.primaryColor,
+    automaticallyImplyLeading: false,
+    centerTitle: false,
+    actions: [
+      _totalMoney(context, viewModel),
+      IconButton(
+        icon: Icon(Icons.logout),
+        onPressed: () => _navigateToSignInScreen(context),
+      ),
+    ],
+  );
+  void _navigateToSignInScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Signinscreen()),
+    );
+  }
 
   Text _appBarTitle(BuildContext context) => BoldTitle(
-        data: 'Discover',
+        data: '',
         context: context,
       );
 
