@@ -1,11 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:poshpicks/fuctions/authfunctions.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
-
   @override
   State<SignupScreen> createState() => _SignupScreenState();
 }
@@ -22,6 +26,32 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _emailValid = false;
   bool _usernameValid = false;
   bool _passwordValid = false;
+  File? _image;
+
+  final picker = ImagePicker();
+
+  Future getImage(ImageSource source) async {
+    // Request permissions
+    if (source == ImageSource.camera) {
+      var cameraPermissionStatus = await Permission.camera.request();
+      if (!cameraPermissionStatus.isGranted) return;
+    } else {
+      var storagePermissionStatus = await Permission.storage.request();
+      if (!storagePermissionStatus.isGranted) return;
+    }
+
+    // Proceed with image capture or selection
+    final pickedFile = await picker.pickImage(
+        source: source); // Corrected method name
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +64,22 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              _image == null
+                  ? CircleAvatar(
+                radius: 80,
+                child: Icon(Icons.person, size: 80),
+              )
+                  : CircleAvatar(
+                radius: 80,
+                backgroundImage: FileImage(_image!),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  getImage(ImageSource.camera);
+                },
+                child: Text('Take a Picture'),
+              ),
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -147,6 +193,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 onPressed: _validateAndSignUp,
                 child: const Text("Sign Up"),
               ),
+
             ],
           ),
         ),
@@ -154,74 +201,89 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  void _validateAndSignUp() async {
-    if (_nameValid &&
-        _emailValid &&
-        _usernameValid &&
-        _passwordValid &&
-        _agreeToTerms) {
-      CollectionReference collRef =
-      FirebaseFirestore.instance.collection('User');
-      DocumentReference docRef = await collRef.add({
-        'Name': _nameController.text,
-        'Email': _emailController.text,
-        'Username': _usernameController.text,
-        'Password': _passwordController.text,
-        'Agreed to Terms': _agreeToTerms,
-        'Country': _selectedCountry,
-        'Age': _age,
-      });
 
-      // Fetch user details
-      DocumentSnapshot snapshot = await docRef.get();
-      // Show user details in a popup
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("User Details"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Name: ${snapshot['Name']}"),
-              Text("Email: ${snapshot['Email']}"),
-              Text("Username: ${snapshot['Username']}"),
-              Text("Country: ${snapshot['Country']}"),
-              Text("Age: ${snapshot['Age']}"),
+  void _validateAndSignUp() async {
+    try {
+      if (_nameValid &&
+          _emailValid &&
+          _usernameValid &&
+          _passwordValid &&
+          _agreeToTerms &&
+          _image != null) {
+        // Upload image to Firebase Storage
+        firebase_storage.Reference ref =
+        firebase_storage.FirebaseStorage.instance.ref().child('user_images/${DateTime.now().millisecondsSinceEpoch}.jpg');
+        firebase_storage.UploadTask uploadTask = ref.putFile(_image!);
+        firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+        String imageUrl = await taskSnapshot.ref.getDownloadURL();
+
+        // Perform sign up first
+        await signup(_emailController.text, _passwordController.text);
+
+        // Add user details to Firestore
+        CollectionReference collRef = FirebaseFirestore.instance.collection('User');
+        DocumentReference docRef = await collRef.add({
+          'Name': _nameController.text,
+          'Email': _emailController.text,
+          'Username': _usernameController.text,
+          'Password': _passwordController.text,
+          'Agreed to Terms': _agreeToTerms,
+          'Country': _selectedCountry,
+          'Age': _age,
+          'ImageURL': imageUrl, // Add image URL to Firestore
+        });
+
+        // Fetch user details
+        DocumentSnapshot snapshot = await docRef.get();
+        // Show user details in a popup
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("User Details"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Name: ${snapshot['Name']}"),
+                Text("Email: ${snapshot['Email']}"),
+                Text("Username: ${snapshot['Username']}"),
+                Text("Country: ${snapshot['Country']}"),
+                Text("Age: ${snapshot['Age']}"),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Signinscreen()),
+                  );
+                },
+                child: const Text("OK"),
+              ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Signinscreen()),
-                );
-              },
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-
-      // Perform sign up
-      signup(_emailController.text, _passwordController.text);
-    } else {
-      // Show error message or handle invalid input
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Error"),
-          content: const Text("Please fill all fields correctly."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
+        );
+      } else {
+        // Show error message or handle invalid input
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Error"),
+            content: const Text("Please fill all fields correctly and select an image."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error in signup: $e');
     }
   }
+
 }

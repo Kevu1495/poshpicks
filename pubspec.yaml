@@ -49,6 +49,9 @@ dependencies:
 
   # Log
   logger: ^1.1.0
+  permission_handler: ^11.3.1
+  image_picker: ^1.0.7
+  firebase_storage: ^11.6.11
 
 dev_dependencies:
   flutter_test:

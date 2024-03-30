@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     title: 'Shopping App',
     debugShowCheckedModeBanner: false,
     theme: _theme(context),
-    home: const HomeView(),
+    home: const Signinscreen(),
   );
 
   ThemeData _theme(BuildContext context) => ThemeData(
