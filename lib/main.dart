@@ -4,6 +4,7 @@ import 'package:poshpicks/core/extensions/app_extensions.dart';
 import 'package:poshpicks/features/home/view/home_view.dart';
 import 'package:poshpicks/firebase_options.dart';
 import 'package:poshpicks/screens/HomepageScreen.dart';
+import 'package:poshpicks/screens/NewHome.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
     title: 'Shopping App',
     debugShowCheckedModeBanner: false,
     theme: _theme(context),
-    home: const Signinscreen(),
+    home: const HomeScreen(),
   );
 
   ThemeData _theme(BuildContext context) => ThemeData(

@@ -28,35 +28,17 @@ class _HomepageScreenState extends State<HomepageScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: 'Search for products...',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  // Add functionality to search products
-                },
-              ),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8.0),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    CategoryChip(categoryName: 'Electronics'),
-                    CategoryChip(categoryName: 'Clothing'),
-                    CategoryChip(categoryName: 'Accessories'),
-                    // Add more category chips as needed
-                  ],
-                ),
               ),
             ),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
-                'Featured Products',
+                'Products',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
@@ -67,31 +49,13 @@ class _HomepageScreenState extends State<HomepageScreen> {
                 crossAxisCount: 2,
                 childAspectRatio: 0.75,
               ),
-              itemCount: 8, // Change this to the actual number of products
+              itemCount: 7, // Change this to the actual number of products
               itemBuilder: (context, index) {
                 return ProductCard(); // Create a separate widget for product card
               },
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class CategoryChip extends StatelessWidget {
-  final String categoryName;
-
-  const CategoryChip({required this.categoryName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Chip(
-        label: Text(categoryName),
-        backgroundColor: Colors.blue,
-        labelStyle: const TextStyle(color: Colors.white),
       ),
     );
   }
