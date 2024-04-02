@@ -14,32 +14,40 @@ class ItemCard extends Stack {
     Key? key,
     required BuildContext context,
     required HomeModel model,
+    required VoidCallback callback,
     required HomeViewModel viewModel,
   }) : super(
           key: key,
           children: [
-            _productCard(context, model),
+            _productCard(context, model, callback),
             _incrementDeincrementButtons(viewModel, model, context)
           ],
         );
 
-  static Card _productCard(BuildContext context, HomeModel model) => Card(
+  static Card _productCard(
+          BuildContext context, HomeModel model, VoidCallback callback) =>
+      Card(
         elevation: 5,
         shape: RoundedRectangleBorder(borderRadius: context.normalBorderRadius),
         child: Padding(
           padding: context.paddingLow,
-          child: Column(
-            children: [
-              _productImage(model),
-              context.emptySizedHeightBoxLow,
-              Expanded(
-                flex: 2,
-                child: _productTitle(model),
-              ),
-              Expanded(
-                child: _price(model, context),
-              )
-            ],
+          child: GestureDetector(
+            onTap: () {
+              callback();
+            },
+            child: Column(
+              children: [
+                _productImage(model),
+                context.emptySizedHeightBoxLow,
+                Expanded(
+                  flex: 2,
+                  child: _productTitle(model),
+                ),
+                Expanded(
+                  child: _price(model, context),
+                )
+              ],
+            ),
           ),
         ),
       );

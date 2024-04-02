@@ -1,18 +1,216 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:poshpicks/features/home/model/home_model.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
-import '../../../product/component/text/subtitle1_text.dart';
+
 import '../../../core/base/view/base_view.dart';
-import '../../../product/component/card/special_icon_card.dart';
-import '../../../product/component/card/special_text_card.dart';
-import '../viewmodel/home_view_model.dart';
 import '../../../core/extensions/app_extensions.dart';
 import '../../../product/component/card/item_card.dart';
+import '../../../product/component/card/special_icon_card.dart';
+import '../../../product/component/card/special_text_card.dart';
 import '../../../product/component/icon/primary_icon.dart';
 import '../../../product/component/image/responsive_image.dart';
 import '../../../product/component/text/bold_title.dart';
 import '../../../product/component/text/primary_bold_text.dart';
 import '../../../product/component/text/product_name.dart';
+import '../../../product/component/text/subtitle1_text.dart';
+import '../viewmodel/home_view_model.dart';
+
+class ProductDetailScreen extends StatefulWidget {
+  final HomeModel model;
+  const ProductDetailScreen({super.key, required this.model});
+
+  @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: double.infinity,
+            width: double.infinity,
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 280,
+                  left: 10,
+                  right: 10,
+                  child: SingleChildScrollView(
+                    physics: const ScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(
+                          height: 12,
+                        ),
+                        Text(
+                          widget.model.title!,
+                          style: TextStyle(fontSize: 30),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Price',
+                              style: TextStyle(fontSize: 25),
+                            ),
+                            Text(
+                              '\$ ${widget.model.price.toString()}',
+                              style: TextStyle(fontSize: 25),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '',
+                                      style:
+                                          Theme.of(context).textTheme.headline2,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '120',
+                              style: Theme.of(context).textTheme.headline3,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  '',
+                                  style: Theme.of(context).textTheme.headline2,
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                const Icon(
+                                  Icons.thumb_up_alt_outlined,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        // Align(
+                        //   alignment: Alignment.centerRight,
+                        //   child: OutlinedButton(
+                        //     onPressed: () => _.goCardBuy(),
+                        //     child: Text(
+                        //       S.of(context)!.buy,
+                        //       style: const TextStyle().copyWith(
+                        //         color: Colors.deepPurple,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          'Description',
+                          style: Theme.of(context).textTheme.headline2,
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          widget.model.description!,
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  width: double.maxFinite,
+                  height: 250,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF7BF50),
+                    borderRadius: BorderRadius.circular(
+                      25,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(
+                              Icons.keyboard_arrow_left_outlined,
+                              size: 40,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.favorite_border_outlined,
+                            ),
+                          ),
+                        ],
+                      ),
+                      CircleAvatar(
+                        radius: 90,
+                        backgroundColor: Colors.white,
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            width: double.maxFinite,
+                            height: 160.0,
+                            fit: BoxFit.scaleDown,
+                            imageUrl: widget.model.image!,
+                            placeholder: (context, url) => const SizedBox(
+                                width: 10,
+                                height: 10,
+                                child: CircularProgressIndicator(
+                                  color: Colors.blue,
+                                )),
+                            errorWidget: (context, url, error) => Image.asset(
+                              'assets/images/sinimagen.png',
+                              height: 30,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class HomeView extends StatelessWidget {
   static const path = '/home';
@@ -38,17 +236,17 @@ class HomeView extends StatelessWidget {
       );
 
   AppBar _appBar(BuildContext context, HomeViewModel viewModel) => AppBar(
-    backgroundColor: context.primaryColor,
-    automaticallyImplyLeading: false,
-    centerTitle: false,
-    actions: [
-      _totalMoney(context, viewModel),
-      IconButton(
-        icon: Icon(Icons.logout),
-        onPressed: () => _navigateToSignInScreen(context),
-      ),
-    ],
-  );
+        backgroundColor: context.primaryColor,
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        actions: [
+          _totalMoney(context, viewModel),
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => _navigateToSignInScreen(context),
+          ),
+        ],
+      );
   void _navigateToSignInScreen(BuildContext context) {
     Navigator.push(
       context,
@@ -84,6 +282,12 @@ class HomeView extends StatelessWidget {
       );
 
   // Body widget
+  void _goToNextPage(BuildContext context, HomeModel model) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return ProductDetailScreen(model: model);
+    }));
+  }
+
   ElasticInDown _products(BuildContext context, HomeViewModel viewModel) =>
       ElasticInDown(
         duration: context.durationSlow,
@@ -97,6 +301,9 @@ class HomeView extends StatelessWidget {
               context: context,
               model: viewModel.items[index],
               viewModel: viewModel,
+              callback: () {
+                _goToNextPage(context, viewModel.items[index]);
+              },
             ),
           ),
         ),

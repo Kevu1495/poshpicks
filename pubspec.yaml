@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.1 <4.0.0'
+  sdk: '>=3.2.2 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -35,9 +35,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
-  firebase_core: ^2.27.2
-  firebase_auth: ^4.18.0
-  cloud_firestore: ^4.15.10
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.8
+  cloud_firestore: ^4.15.8
   animate_do: ^3.3.4
   connectivity_plus: ^6.0.1
   cached_network_image: ^3.3.1
@@ -51,10 +51,11 @@ dependencies:
   logger: ^1.1.0
   permission_handler: ^11.3.1
   image_picker: ^1.0.7
-  firebase_storage: ^11.6.11
-  http: ^1.2.1
   get: ^4.6.6
   flutter_svg: ^2.0.10+1
+  http: ^1.2.0
+  firebase_storage: ^11.6.9
+  local_auth: ^2.1.8
 
 dev_dependencies:
   flutter_test:
