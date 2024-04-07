@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:poshpicks/features/home/model/home_model.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
+import 'package:poshpicks/test.dart';
 
 import '../../../core/base/view/base_view.dart';
 import '../../../core/extensions/app_extensions.dart';
@@ -54,6 +55,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         Text(
                           widget.model.title!,
                           style: TextStyle(fontSize: 30),
+
                         ),
                         const SizedBox(height: 20),
                         Row(
@@ -69,7 +71,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -91,48 +92,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '120',
-                              style: Theme.of(context).textTheme.headline3,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  '',
-                                  style: Theme.of(context).textTheme.headline2,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                const Icon(
-                                  Icons.thumb_up_alt_outlined,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        // Align(
-                        //   alignment: Alignment.centerRight,
-                        //   child: OutlinedButton(
-                        //     onPressed: () => _.goCardBuy(),
-                        //     child: Text(
-                        //       S.of(context)!.buy,
-                        //       style: const TextStyle().copyWith(
-                        //         color: Colors.deepPurple,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                        const SizedBox(
-                          height: 20,
-                        ),
+
+
                         Text(
                           'Description',
                           style: Theme.of(context).textTheme.headline2,
@@ -143,6 +104,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         Text(
                           widget.model.description!,
                           style: Theme.of(context).textTheme.bodyText1,
+                          textAlign: TextAlign.justify,
                         ),
                       ],
                     ),
@@ -193,7 +155,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   color: Colors.blue,
                                 )),
                             errorWidget: (context, url, error) => Image.asset(
-                              'assets/images/sinimagen.png',
+                              'assets/images/PhotoHub-logos.jpeg',
                               height: 30,
                               fit: BoxFit.cover,
                             ),
@@ -239,7 +201,9 @@ class HomeView extends StatelessWidget {
         backgroundColor: context.primaryColor,
         automaticallyImplyLeading: false,
         centerTitle: false,
+
         actions: [
+
           _totalMoney(context, viewModel),
           IconButton(
             icon: Icon(Icons.logout),
@@ -254,10 +218,6 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Text _appBarTitle(BuildContext context) => BoldTitle(
-        data: '',
-        context: context,
-      );
 
   Padding _totalMoney(BuildContext context, HomeViewModel viewModel) {
     String totalMoney = '\$ ${viewModel.totalPrice}';
@@ -318,10 +278,35 @@ class HomeView extends StatelessWidget {
       builder: (context) => viewModel.basketItems.isEmpty
           ? _emptyBasket(context)
           : StatefulBuilder(builder: (context, StateSetter setState) {
-              return _basketItems(context, viewModel, setState);
-            }),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: _basketItems(context, viewModel, setState),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to the signup page
+                  _navigateToSignUpScreen(context);
+                },
+                child: Text('Locate Store'),
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
+
+  void _navigateToSignUpScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => locateStore()),
+    );
+  }
+
 
   FlipInY _emptyBasket(BuildContext context) => FlipInY(
         child: Center(
@@ -337,6 +322,7 @@ class HomeView extends StatelessWidget {
                   context: context,
                   color: context.primaryColor,
                 ),
+
               ],
             ),
           ),

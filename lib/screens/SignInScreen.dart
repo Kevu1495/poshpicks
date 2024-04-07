@@ -31,6 +31,11 @@ class _SigninscreenState extends State<Signinscreen> {
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
+              Image.asset(
+                'assets/images/PhotoHub-logos_transparent.png',
+                height: 200, // Adjust the height as needed
+                width: 200, // Adjust the width as needed
+              ),
               // Username Text Field
             Positioned( // Position login form elements strategically
             bottom: 370.0, // Adjust bottom position for desired layout

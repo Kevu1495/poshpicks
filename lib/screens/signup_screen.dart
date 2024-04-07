@@ -15,6 +15,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -31,6 +32,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final picker = ImagePicker();
 
   Future getImage(ImageSource source) async {
+    print("getImage function called with source: $source");
     // Request permissions
     if (source == ImageSource.camera) {
       var cameraPermissionStatus = await Permission.camera.request();
@@ -41,17 +43,20 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     // Proceed with image capture or selection
-    final pickedFile = await picker.pickImage(
-        source: source); // Corrected method name
+    final pickedFile = await picker.pickImage(source: source);
 
     setState(() {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
+        print("Image picked: ${_image!.path}");
       } else {
         print('No image selected.');
       }
     });
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +70,7 @@ class _SignupScreenState extends State<SignupScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _image == null
-                  ? CircleAvatar(
+                  ? const CircleAvatar(
                 radius: 80,
                 child: Icon(Icons.person, size: 80),
               )
@@ -79,6 +84,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   getImage(ImageSource.camera);
                 },
                 child: Text('Take a Picture'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  getImage(ImageSource.gallery);
+                },
+                child: Text('Select from Gallery'),
               ),
               TextField(
                 controller: _nameController,
@@ -211,8 +222,7 @@ class _SignupScreenState extends State<SignupScreen> {
           _agreeToTerms &&
           _image != null) {
         // Upload image to Firebase Storage
-        firebase_storage.Reference ref =
-        firebase_storage.FirebaseStorage.instance.ref().child('user_images/${DateTime.now().millisecondsSinceEpoch}.jpg');
+          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child('user_images/${_usernameController.text}.jpg');
         firebase_storage.UploadTask uploadTask = ref.putFile(_image!);
         firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
         String imageUrl = await taskSnapshot.ref.getDownloadURL();

@@ -56,6 +56,7 @@ dependencies:
   http: ^1.2.0
   firebase_storage: ^11.6.9
   local_auth: ^2.1.8
+  geolocator: ^11.0.0
 
 dev_dependencies:
   flutter_test:
@@ -83,8 +84,9 @@ flutter:
     - family: Avenir
       fonts:
         - asset: assets/fonts/Avenir-Medium.ttf
-  # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/images/ # To add assets to your application, add an assets section, like this:
+
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

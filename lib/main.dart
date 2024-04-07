@@ -5,9 +5,15 @@ import 'package:local_auth/local_auth.dart';
 import 'package:poshpicks/core/extensions/app_extensions.dart';
 import 'package:poshpicks/features/home/view/home_view.dart';
 import 'package:poshpicks/firebase_options.dart';
+import 'package:poshpicks/screens/HomepageScreen.dart';
+import 'package:poshpicks/screens/NewHome.dart';
+import 'package:poshpicks/screens/SignInScreen.dart';
+import 'package:poshpicks/screens/signup_screen.dart';
+import 'package:poshpicks/test.dart';
 
 import 'core/init/navigation/navigation_route.dart';
 import 'core/init/navigation/navigation_service.dart';
+import 'idk.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +32,7 @@ class MyApp extends StatelessWidget {
         title: 'Shopping App',
         debugShowCheckedModeBanner: false,
         theme: _theme(context),
-        home: const BiometricScreen(),
+        home: const Signinscreen(),
       );
 
   ThemeData _theme(BuildContext context) => ThemeData(
@@ -35,7 +41,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "Avenir",
       );
 }
-
+//biometric
 enum _SupportState {
   unknown,
   supported,
