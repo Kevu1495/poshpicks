@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'get_location.dart';
@@ -27,53 +30,73 @@ class _LocateStoreState extends State<LocateStore> {
   bool isLoading = false;
   String lat = '';
   String long = '';
+  void redirectToURL({required String query}) async {
+    setState(() {
+      isLoading = true;
+      showDialog(
+          context: context,
+          builder: (context) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.yellow,
+              ),
+            );
+          });
+      // Navigator.push(context,
+      //     MaterialPageRoute(builder: (context) {
+      //       return Scaffold(
+      //         backgroundColor: Colors.transparent,
+      //         body: Center(
+      //           child: CircularProgressIndicator(
+      //             color: greenColor,
+      //           ),
+      //         ),
+      //       );
+      //     }));
+    });
+    Position position = await determinePosition();
+    setState(() {
+      lat = position.latitude.toString();
+      long = position.longitude.toString();
+      isLoading = false;
+      Navigator.of(context).pop();
+    });
+// This is the 255th attempt to try to understand what's happening
+    //increase counter if you failed to understand
+    //counter=255
+    var url = Uri.parse(
+        "https://www.google.com/maps/search/$query/@$lat,$long,15.25z?entry=ttu");
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _sendEmail() async {
+    final GoogleSignInAccount? user = await GoogleAuthApi().signIn();
+    final email = user!.email;
+    final auth = await user.authentication;
+    final token = auth.accessToken;
+    final smtpServer = gmailSaslXoauth2(email, token!);
+    final message = Message()
+      ..from = Address(email, 'Aditya')
+      ..recipients = ['2021.aditya.kushwaha@ves.ac.in']
+      ..subject = 'Test'
+      ..text = 'Hi';
+    try {
+      await send(message, smtpServer);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Sent email')));
+    } on MailerException catch (err) {
+      print('mail error$err');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    void redirectToURL({required String query}) async {
-      setState(() {
-        isLoading = true;
-        showDialog(
-            context: context,
-            builder: (context) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.yellow,
-                ),
-              );
-            });
-        // Navigator.push(context,
-        //     MaterialPageRoute(builder: (context) {
-        //       return Scaffold(
-        //         backgroundColor: Colors.transparent,
-        //         body: Center(
-        //           child: CircularProgressIndicator(
-        //             color: greenColor,
-        //           ),
-        //         ),
-        //       );
-        //     }));
-      });
-      Position position = await determinePosition();
-      setState(() {
-        lat = position.latitude.toString();
-        long = position.longitude.toString();
-        isLoading = false;
-        Navigator.of(context).pop();
-      });
-// This is the 255th attempt to try to understand what's happening
-      //increase counter if you failed to understand
-      //counter=255
-      var url = Uri.parse(
-          "https://www.google.com/maps/search/$query/@$lat,$long,15.25z?entry=ttu");
-      try {
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url);
-        }
-      } catch (e) {
-        print(e);
-      }
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Store Locations'),
@@ -113,13 +136,37 @@ class _LocateStoreState extends State<LocateStore> {
               },
             ),
           ),
-          ElevatedButton(
-              onPressed: () {
-                redirectToURL(query: 'MacDonalds');
-              },
-              child: Text('Google Maps'))
+          Row(
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                    redirectToURL(query: 'MacDonalds');
+                  },
+                  child: Text('Google Maps')),
+              ElevatedButton(
+                  onPressed: () {
+                    _sendEmail();
+                  },
+                  child: Text('Place Order')),
+            ],
+          )
         ],
       ),
     );
+  }
+}
+
+class GoogleAuthApi {
+  final _googleSignIn = GoogleSignIn();
+  Future<GoogleSignInAccount?> signIn() async {
+    try {
+      if (await _googleSignIn.isSignedIn()) {
+        return _googleSignIn.currentUser;
+      } else {
+        return await _googleSignIn.signIn();
+      }
+    } catch (err) {
+      print('google error' + err.toString());
+    }
   }
 }

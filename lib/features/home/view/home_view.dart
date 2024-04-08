@@ -3,6 +3,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'package:poshpicks/features/home/model/home_model.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
 import 'package:poshpicks/test.dart';
@@ -206,6 +209,26 @@ class _HomeViewState extends State<HomeView> {
     getUserDetails();
   }
 
+  void _sendEmail({required String text}) async {
+    final GoogleSignInAccount? user = await GoogleAuthApi().signIn();
+    final email = user!.email;
+    final auth = await user.authentication;
+    final token = auth.accessToken;
+    final smtpServer = gmailSaslXoauth2(email, token!);
+    final message = Message()
+      ..from = Address(email, 'Aditya')
+      ..recipients = ['2021.aditya.kushwaha@ves.ac.in']
+      ..subject = 'Test'
+      ..text = text;
+    try {
+      await send(message, smtpServer);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Sent email')));
+    } on MailerException catch (err) {
+      print('mail error$err');
+    }
+  }
+
   @override
   Widget build(BuildContext context) => BaseView<HomeViewModel>(
         viewModel: HomeViewModel(),
@@ -334,6 +357,17 @@ class _HomeViewState extends State<HomeView> {
                     padding: const EdgeInsets.all(16.0),
                     child: ElevatedButton(
                       onPressed: () {
+                        String text = prepareEmailBody(viewModel);
+                        // Navigate to the signup page
+                        _sendEmail(text: text);
+                      },
+                      child: Text('Place order'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
                         // Navigate to the signup page
                         _navigateToLocateStore(context);
                       },
@@ -344,6 +378,25 @@ class _HomeViewState extends State<HomeView> {
               );
             }),
     );
+  }
+
+  String prepareEmailBody(HomeViewModel viewModel) {
+    String message = '';
+
+    for (int i = 0; i < viewModel.basketItems.length; i++) {
+      HomeModel item = viewModel.basketItems[i];
+
+      // Concatenate item information into the message string
+      message += 'Item ${i + 1}: \n';
+      message += 'Title: ${item.title ?? 'N/A'}\n';
+      message += 'Price: ${item.price ?? 0}\n';
+      message += 'Quantity: ${item.count}\n\n';
+    }
+
+    // Adding total price information
+    message += 'Total Price: \$${viewModel.totalPrice.toStringAsFixed(2)}\n';
+
+    return message;
   }
 
   void _navigateToLocateStore(BuildContext context) {
