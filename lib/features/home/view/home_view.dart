@@ -1,5 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:poshpicks/features/home/model/home_model.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
@@ -12,7 +14,6 @@ import '../../../product/component/card/special_icon_card.dart';
 import '../../../product/component/card/special_text_card.dart';
 import '../../../product/component/icon/primary_icon.dart';
 import '../../../product/component/image/responsive_image.dart';
-import '../../../product/component/text/bold_title.dart';
 import '../../../product/component/text/primary_bold_text.dart';
 import '../../../product/component/text/product_name.dart';
 import '../../../product/component/text/subtitle1_text.dart';
@@ -55,13 +56,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         Text(
                           widget.model.title!,
                           style: TextStyle(fontSize: 30),
-
                         ),
                         const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
+                            const Text(
                               'Price',
                               style: TextStyle(fontSize: 25),
                             ),
@@ -92,8 +92,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ],
                         ),
-
-
                         Text(
                           'Description',
                           style: Theme.of(context).textTheme.headline2,
@@ -131,12 +129,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               size: 40,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.favorite_border_outlined,
-                            ),
-                          ),
+                          // IconButton(
+                          //   onPressed: () {},
+                          //   icon: const Icon(
+                          //     Icons.favorite_border_outlined,
+                          //   ),
+                          // ),
                         ],
                       ),
                       CircleAvatar(
@@ -174,9 +172,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 }
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   static const path = '/home';
   const HomeView({Key? key}) : super(key: key);
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  bool _isLoading = false;
+  DocumentSnapshot? snapshot;
+  void getUserDetails() async {
+    setState(() {
+      _isLoading = true;
+    });
+    CollectionReference collRef = FirebaseFirestore.instance.collection('User');
+    try {
+      snapshot =
+          await collRef.doc(FirebaseAuth.instance.currentUser!.uid).get();
+    } catch (err) {
+      print(err.toString());
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserDetails();
+  }
 
   @override
   Widget build(BuildContext context) => BaseView<HomeViewModel>(
@@ -190,20 +218,38 @@ class HomeView extends StatelessWidget {
           Widget isLoading = viewModel.isLoading
               ? _loadingBar(context)
               : _products(context, viewModel);
-          return Scaffold(
-              backgroundColor: context.groupedBackground,
-              appBar: _appBar(context, viewModel),
-              body: isLoading);
+          return (_isLoading)
+              ? Scaffold(body: Center(child: _loadingBar(context)))
+              : Scaffold(
+                  drawer: Drawer(
+                    backgroundColor: Colors.white,
+                    child: SafeArea(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                                radius: 30,
+                                backgroundImage: NetworkImage(
+                                  snapshot!['ImageURL'],
+                                )),
+                          ),
+                          Text(snapshot!['Name']),
+                        ],
+                      ),
+                    ),
+                  ),
+                  backgroundColor: context.groupedBackground,
+                  appBar: _appBar(context, viewModel),
+                  body: isLoading);
         },
       );
 
   AppBar _appBar(BuildContext context, HomeViewModel viewModel) => AppBar(
         backgroundColor: context.primaryColor,
-        automaticallyImplyLeading: false,
         centerTitle: false,
-
         actions: [
-
           _totalMoney(context, viewModel),
           IconButton(
             icon: Icon(Icons.logout),
@@ -211,13 +257,13 @@ class HomeView extends StatelessWidget {
           ),
         ],
       );
-  void _navigateToSignInScreen(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Signinscreen()),
-    );
-  }
 
+  void _navigateToSignInScreen(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) {
+      return Signinscreen();
+    }), (route) => false);
+  }
 
   Padding _totalMoney(BuildContext context, HomeViewModel viewModel) {
     String totalMoney = '\$ ${viewModel.totalPrice}';
@@ -278,35 +324,34 @@ class HomeView extends StatelessWidget {
       builder: (context) => viewModel.basketItems.isEmpty
           ? _emptyBasket(context)
           : StatefulBuilder(builder: (context, StateSetter setState) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: _basketItems(context, viewModel, setState),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to the signup page
-                  _navigateToSignUpScreen(context);
-                },
-                child: Text('Locate Store'),
-              ),
-            ),
-          ],
-        );
-      }),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _basketItems(context, viewModel, setState),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Navigate to the signup page
+                        _navigateToLocateStore(context);
+                      },
+                      child: Text('Locate Store'),
+                    ),
+                  ),
+                ],
+              );
+            }),
     );
   }
 
-  void _navigateToSignUpScreen(BuildContext context) {
+  void _navigateToLocateStore(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => locateStore()),
+      MaterialPageRoute(builder: (context) => LocateStore()),
     );
   }
-
 
   FlipInY _emptyBasket(BuildContext context) => FlipInY(
         child: Center(
@@ -322,7 +367,6 @@ class HomeView extends StatelessWidget {
                   context: context,
                   color: context.primaryColor,
                 ),
-
               ],
             ),
           ),

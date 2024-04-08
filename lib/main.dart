@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,15 +6,10 @@ import 'package:local_auth/local_auth.dart';
 import 'package:poshpicks/core/extensions/app_extensions.dart';
 import 'package:poshpicks/features/home/view/home_view.dart';
 import 'package:poshpicks/firebase_options.dart';
-import 'package:poshpicks/screens/HomepageScreen.dart';
-import 'package:poshpicks/screens/NewHome.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
-import 'package:poshpicks/screens/signup_screen.dart';
-import 'package:poshpicks/test.dart';
 
 import 'core/init/navigation/navigation_route.dart';
 import 'core/init/navigation/navigation_service.dart';
-import 'idk.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +28,30 @@ class MyApp extends StatelessWidget {
         title: 'Shopping App',
         debugShowCheckedModeBanner: false,
         theme: _theme(context),
-        home: const Signinscreen(),
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.active) {
+              if (snapshot.hasData) {
+                return HomeView();
+              } else if (snapshot.hasError) {
+                return Scaffold(
+                  body: Center(
+                    child: Text('${snapshot.error}'),
+                  ),
+                );
+              }
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.black,
+                ),
+              );
+            }
+            return const Signinscreen();
+          },
+        ),
       );
 
   ThemeData _theme(BuildContext context) => ThemeData(
@@ -41,6 +60,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "Avenir",
       );
 }
+
 //biometric
 enum _SupportState {
   unknown,

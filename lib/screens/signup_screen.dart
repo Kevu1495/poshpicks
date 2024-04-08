@@ -1,12 +1,12 @@
-import 'package:flutter/foundation.dart';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:poshpicks/fuctions/authfunctions.dart';
 import 'package:poshpicks/screens/SignInScreen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -15,7 +15,6 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -34,13 +33,13 @@ class _SignupScreenState extends State<SignupScreen> {
   Future getImage(ImageSource source) async {
     print("getImage function called with source: $source");
     // Request permissions
-    if (source == ImageSource.camera) {
-      var cameraPermissionStatus = await Permission.camera.request();
-      if (!cameraPermissionStatus.isGranted) return;
-    } else {
-      var storagePermissionStatus = await Permission.storage.request();
-      if (!storagePermissionStatus.isGranted) return;
-    }
+    // if (source == ImageSource.camera) {
+    //   var cameraPermissionStatus = await Permission.camera.request();
+    //   if (!cameraPermissionStatus.isGranted) return;
+    // } else {
+    //   var storagePermissionStatus = await Permission.storage.request();
+    //   if (!storagePermissionStatus.isGranted) return;
+    // }
 
     // Proceed with image capture or selection
     final pickedFile = await picker.pickImage(source: source);
@@ -55,9 +54,6 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,13 +67,13 @@ class _SignupScreenState extends State<SignupScreen> {
             children: [
               _image == null
                   ? const CircleAvatar(
-                radius: 80,
-                child: Icon(Icons.person, size: 80),
-              )
+                      radius: 80,
+                      child: Icon(Icons.person, size: 80),
+                    )
                   : CircleAvatar(
-                radius: 80,
-                backgroundImage: FileImage(_image!),
-              ),
+                      radius: 80,
+                      backgroundImage: FileImage(_image!),
+                    ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
@@ -124,8 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: InputDecoration(
                   labelText: "Username",
                   border: OutlineInputBorder(),
-                  errorText:
-                  _usernameValid ? null : "Enter a valid username",
+                  errorText: _usernameValid ? null : "Enter a valid username",
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -140,8 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: InputDecoration(
                   labelText: "Password",
                   border: OutlineInputBorder(),
-                  errorText:
-                  _passwordValid ? null : "Enter a valid password",
+                  errorText: _passwordValid ? null : "Enter a valid password",
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -204,14 +198,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 onPressed: _validateAndSignUp,
                 child: const Text("Sign Up"),
               ),
-
             ],
           ),
         ),
       ),
     );
   }
-
 
   void _validateAndSignUp() async {
     try {
@@ -222,7 +214,10 @@ class _SignupScreenState extends State<SignupScreen> {
           _agreeToTerms &&
           _image != null) {
         // Upload image to Firebase Storage
-          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child('user_images/${_usernameController.text}.jpg');
+        firebase_storage.Reference ref = firebase_storage
+            .FirebaseStorage.instance
+            .ref()
+            .child('user_images/${_usernameController.text}.jpg');
         firebase_storage.UploadTask uploadTask = ref.putFile(_image!);
         firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
         String imageUrl = await taskSnapshot.ref.getDownloadURL();
@@ -231,8 +226,9 @@ class _SignupScreenState extends State<SignupScreen> {
         await signup(_emailController.text, _passwordController.text);
 
         // Add user details to Firestore
-        CollectionReference collRef = FirebaseFirestore.instance.collection('User');
-        DocumentReference docRef = await collRef.add({
+        CollectionReference collRef =
+            FirebaseFirestore.instance.collection('User');
+        await collRef.doc(FirebaseAuth.instance.currentUser!.uid).set({
           'Name': _nameController.text,
           'Email': _emailController.text,
           'Username': _usernameController.text,
@@ -242,9 +238,11 @@ class _SignupScreenState extends State<SignupScreen> {
           'Age': _age,
           'ImageURL': imageUrl, // Add image URL to Firestore
         });
+        DocumentSnapshot snapshot =
+            await collRef.doc(FirebaseAuth.instance.currentUser!.uid).get();
 
         // Fetch user details
-        DocumentSnapshot snapshot = await docRef.get();
+        //DocumentSnapshot snapshot = await docRef.get();
         // Show user details in a popup
         showDialog(
           context: context,
@@ -281,7 +279,8 @@ class _SignupScreenState extends State<SignupScreen> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text("Error"),
-            content: const Text("Please fill all fields correctly and select an image."),
+            content: const Text(
+                "Please fill all fields correctly and select an image."),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -295,5 +294,4 @@ class _SignupScreenState extends State<SignupScreen> {
       print('Error in signup: $e');
     }
   }
-
 }

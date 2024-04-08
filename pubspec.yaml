@@ -57,6 +57,7 @@ dependencies:
   firebase_storage: ^11.6.9
   local_auth: ^2.1.8
   geolocator: ^11.0.0
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:
