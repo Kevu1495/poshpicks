@@ -160,9 +160,7 @@ class GoogleAuthApi {
   final _googleSignIn = GoogleSignIn();
   Future<GoogleSignInAccount?> signIn() async {
     try {
-      if (await _googleSignIn.isSignedIn()) {
-        return _googleSignIn.currentUser;
-      } else {
+      {
         return await _googleSignIn.signIn();
       }
     } catch (err) {
